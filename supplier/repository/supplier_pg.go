@@ -1,23 +1,21 @@
-package models
+package repository
 
-type Supplier struct {
-	ID      int64  `form:"id" json:"id"`
-	Code    string `form:"code" json:"code"`
-	Name    string `form:"name" json:"name"`
-	Address string `form:"address" json:"address"`
-	Status  string `form:"status" json:"status"`
-}
+import (
+	"database/sql"
 
-func (db *DB) AllSuppliers() ([]*Supplier, error) {
+	"github.com/arham09/conn-db/supplier/models"
+)
+
+func AllSuppliers(db *sql.DB) ([]*models.Supplier, error) {
 	rows, err := db.Query("SELECT id, code, name, address, status FROM suppliers")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	supps := make([]*Supplier, 0)
+	supps := make([]*models.Supplier, 0)
 	for rows.Next() {
-		sup := new(Supplier)
+		sup := new(models.Supplier)
 		err := rows.Scan(&sup.ID, &sup.Code, &sup.Name, &sup.Address, &sup.Status)
 		if err != nil {
 			return nil, err

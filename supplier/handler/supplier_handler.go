@@ -1,18 +1,15 @@
-package controllers
+package handler
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
-	"github.com/arham09/conn-db/models"
+	"github.com/arham09/conn-db/supplier/repository"
 )
 
-type Conn interface {
-	SuppliersIndex(w http.ResponseWriter, r *http.Request)
-}
-
 type Env struct {
-	Db models.Datastore
+	Db *sql.DB
 }
 
 func (env *Env) SuppliersIndex(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +18,7 @@ func (env *Env) SuppliersIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	suppliers, err := env.Db.AllSuppliers()
+	suppliers, err := repository.AllSuppliers(env.Db)
 
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
