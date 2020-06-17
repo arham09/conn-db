@@ -1,12 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
+	"os"
+	"time"
 
 	"github.com/arham09/conn-db/config"
-	"github.com/arham09/conn-db/supplier/handler"
+	"github.com/arham09/conn-db/middleware"
+	handler "github.com/arham09/conn-db/supplier/delivery/http"
+	"github.com/arham09/conn-db/supplier/repository"
+	"github.com/arham09/conn-db/supplier/usecase"
+	"github.com/labstack/echo"
 )
 
 func main() {
@@ -14,15 +18,30 @@ func main() {
 	db, err := config.NewDB("postgres://medea:developer@127.0.0.1/battlefield?sslmode=disable")
 
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
+		os.Exit(1)
 	}
 
-	handlers := handler.Env{Db: db}
-	// handler = &controllers.Env{Db: db}
-	// env := &controllers.Env{Db: db}
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-	http.HandleFunc("/suppliers", handlers.SuppliersIndex)
-	// http.HandleFunc("/suppliers", env.SuppliersIndex)
-	fmt.Print("Run in 2020")
-	http.ListenAndServe(":2020", nil)
+	e := echo.New()
+
+	middl := middleware.InitMiddleware()
+
+	e.Use(middl.CORS)
+
+	supplierRepo := repository.NewPgSupplierRepository(db)
+
+	timeoutContext := time.Duration(2) * time.Second
+
+	supplierUsecase := usecase.NewSupplierUsecase(supplierRepo, timeoutContext)
+
+	handler.NewSupplierHandler(e, supplierUsecase)
+
+	log.Fatal(e.Start(":2002"))
 }

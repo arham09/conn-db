@@ -1,31 +1,36 @@
-package handler
+package usecase
 
 import (
-	"database/sql"
-	"fmt"
-	"net/http"
+	"context"
+	"time"
 
-	"github.com/arham09/conn-db/supplier/repository"
+	"github.com/arham09/conn-db/supplier"
+	"github.com/arham09/conn-db/supplier/models"
 )
 
-type Env struct {
-	Db *sql.DB
+type supplierUsecase struct {
+	supplierRepo   supplier.Repository
+	contextTimeout time.Duration
 }
 
-func (env *Env) SuppliersIndex(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
-		return
+// NewSupplierUsecase will create new an supplierUsecase object representation of supplier.Usecase interface
+func NewSupplierUsecase(s supplier.Repository, timeout time.Duration) supplier.Usecase {
+	return &supplierUsecase{
+		supplierRepo:   s,
+		contextTimeout: timeout,
 	}
+}
 
-	suppliers, err := repository.AllSuppliers(env.Db)
+func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error) {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+
+	defer cancel()
+
+	res, err := s.supplierRepo.FetchAll(ctx)
 
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
+		return nil, err
 	}
 
-	for _, supplier := range suppliers {
-		fmt.Fprintf(w, "%s", supplier.Name)
-	}
+	return res, nil
 }
