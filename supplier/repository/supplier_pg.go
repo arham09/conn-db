@@ -19,7 +19,7 @@ func NewPgSupplierRepository(Conn *sql.DB) supplier.Repository {
 }
 
 func (p *pgSupplierRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Supplier, error) {
-	rows, err := p.Conn.QueryContext(ctx, query, args)
+	rows, err := p.Conn.QueryContext(ctx, query, args...)
 
 	if err != nil {
 		logrus.Error(err)
