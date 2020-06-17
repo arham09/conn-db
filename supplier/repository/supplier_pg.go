@@ -13,7 +13,7 @@ type pgSupplierRepository struct {
 	Conn *sql.DB
 }
 
-// NewPgArticleRepository will create an object that represent the supplier.Repository interface
+// NewPgSupplierRepository will create an object that represent the supplier.Repository interface
 func NewPgSupplierRepository(Conn *sql.DB) supplier.Repository {
 	return &pgSupplierRepository{Conn}
 }
