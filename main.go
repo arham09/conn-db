@@ -32,13 +32,10 @@ func main() {
 	e := echo.New()
 
 	middl := middleware.InitMiddleware()
-
 	e.Use(middl.CORS)
 
 	supplierRepo := repository.NewPgSupplierRepository(db)
-
 	timeoutContext := time.Duration(2) * time.Second
-
 	supplierUsecase := usecase.NewSupplierUsecase(supplierRepo, timeoutContext)
 
 	handler.NewSupplierHandler(e, supplierUsecase)
