@@ -7,14 +7,13 @@ import (
 
 	"github.com/arham09/conn-db/config"
 	"github.com/arham09/conn-db/middleware"
-	handler "github.com/arham09/conn-db/supplier/delivery/http"
-	"github.com/arham09/conn-db/supplier/repository"
-	"github.com/arham09/conn-db/supplier/usecase"
+	sh "github.com/arham09/conn-db/supplier/delivery/http"
+	sr "github.com/arham09/conn-db/supplier/repository"
+	su "github.com/arham09/conn-db/supplier/usecase"
 	"github.com/labstack/echo"
 )
 
 func main() {
-	// var handler controllers.Conn
 	db, err := config.NewDB("postgres://medea:developer@127.0.0.1/battlefield?sslmode=disable")
 
 	if err != nil {
@@ -34,11 +33,13 @@ func main() {
 	middl := middleware.InitMiddleware()
 	e.Use(middl.CORS)
 
-	supplierRepo := repository.NewPgSupplierRepository(db)
+	// Module wiring db for repository and usecase to be used in handler
+	supplierRepo := sr.NewPgSupplierRepository(db)
 	timeoutContext := time.Duration(2) * time.Second
-	supplierUsecase := usecase.NewSupplierUsecase(supplierRepo, timeoutContext)
+	supplierUsecase := su.NewSupplierUsecase(supplierRepo, timeoutContext)
 
-	handler.NewSupplierHandler(e, supplierUsecase)
+	// Handler
+	sh.NewSupplierHandler(e, supplierUsecase)
 
 	log.Fatal(e.Start(":2002"))
 }
