@@ -1,17 +1,33 @@
-FROM golang:1.12.0-alpine3.9
+FROM golang:alpine
 
-RUN mkdir /app
+# Set necessary environmet variables needed for our image
+ENV GO111MODULE=on \
+  CGO_ENABLED=0 \
+  GOOS=linux \
+  GOARCH=amd64
 
-ADD . /app
+# Move to working directory /build
+WORKDIR /build
 
-WORKDIR /app
-
-# Add this go mod download command to pull in any dependencies
+# Copy and download dependency using go mod
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
 
-# Our project will now successfully build with the necessary go libraries included.
-RUN go build -o main .
-# Our start command which kicks off
-# our newly created binary executable
+# Copy the code into the container
+COPY . .
 
-CMD ["/app/main"]
+# Build the application
+RUN go build -o main .
+
+# Move to /dist directory as the place for resulting binary folder
+WORKDIR /dist
+
+# Copy binary from build to main folder
+RUN cp /build/main .
+
+# Export necessary port
+EXPOSE 2002
+
+# Command to run when starting the container
+CMD ["/dist/main"]
