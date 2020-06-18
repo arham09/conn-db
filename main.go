@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/arham09/conn-db/config"
+	fr "github.com/arham09/conn-db/faktur/repository"
 	"github.com/arham09/conn-db/middleware"
 	sh "github.com/arham09/conn-db/supplier/delivery/http"
 	sr "github.com/arham09/conn-db/supplier/repository"
@@ -35,8 +36,10 @@ func main() {
 
 	// Module wiring db for repository and usecase to be used in handler
 	supplierRepo := sr.NewPgSupplierRepository(db)
+	fakturRepo := fr.NewPgFakturRepository(db)
+
 	timeoutContext := time.Duration(2) * time.Second
-	supplierUsecase := su.NewSupplierUsecase(supplierRepo, timeoutContext)
+	supplierUsecase := su.NewSupplierUsecase(supplierRepo, fakturRepo, timeoutContext)
 
 	// Handler
 	sh.NewSupplierHandler(e, supplierUsecase)

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/arham09/conn-db/faktur"
 	"github.com/arham09/conn-db/faktur/models"
@@ -36,7 +37,7 @@ func (p *pgFakturRepository) fetch(ctx context.Context, query string, args ...in
 
 	for rows.Next() {
 		t := new(models.Faktur)
-		err = rows.Scan(&t.ID, &t.Code, &t.ExternalID, &t.Name, &t.Status)
+		err = rows.Scan(&t.ID, &t.SupplierID, &t.Code, &t.ExternalID, &t.Name, &t.Status)
 
 		if err != nil {
 			logrus.Error(err)
@@ -50,9 +51,11 @@ func (p *pgFakturRepository) fetch(ctx context.Context, query string, args ...in
 }
 
 func (p *pgFakturRepository) FetchAllFaktur(ctx context.Context, supplierID int64) (res []*models.Faktur, err error) {
-	query := `SELECT id, code, external_id, name, status FROM invoice_groups where supplier_id = ?`
+	query := `SELECT id, supplier_id, COALESCE(code, ''), COALESCE(external_id, ''), name, status FROM invoice_groups where supplier_id=$1`
 
 	res, err = p.fetch(ctx, query, supplierID)
+
+	fmt.Println(res)
 
 	if err != nil {
 		return nil, err
