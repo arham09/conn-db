@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	db, err := config.NewDB("postgres://medea:developer@host.docker.internal/battlefield?sslmode=disable")
+	db, err := config.NewDB("postgres://medea:developer@127.0.0.1/battlefield?sslmode=disable")
 
 	if err != nil {
 		log.Fatal(err)
