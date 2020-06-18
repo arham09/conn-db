@@ -1,5 +1,6 @@
 package models
 
+// Supplier struct is model outcome for data
 type Supplier struct {
 	ID      int64  `form:"id" json:"id"`
 	Code    string `form:"code" json:"code"`
