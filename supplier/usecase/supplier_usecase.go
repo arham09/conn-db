@@ -5,9 +5,8 @@ import (
 	"time"
 
 	"github.com/arham09/conn-db/faktur"
-	fm "github.com/arham09/conn-db/faktur/models"
+	"github.com/arham09/conn-db/models"
 	"github.com/arham09/conn-db/supplier"
-	"github.com/arham09/conn-db/supplier/models"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 )
@@ -46,13 +45,13 @@ func (s *supplierUsecase) fillFakturDetails(c context.Context, data []*models.Su
 	// return data, nil
 	g, ctx := errgroup.WithContext(c)
 
-	mapFaktur := map[int64][]*fm.Faktur{}
+	mapFaktur := map[int64][]*models.Faktur{}
 
 	for _, supplier := range data {
-		mapFaktur[supplier.ID] = []*fm.Faktur{}
+		mapFaktur[supplier.ID] = []*models.Faktur{}
 	}
 
-	fakturChan := make(chan []*fm.Faktur)
+	fakturChan := make(chan []*models.Faktur)
 
 	for supplierID := range mapFaktur {
 		supplierID := supplierID

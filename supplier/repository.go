@@ -3,7 +3,7 @@ package supplier
 import (
 	"context"
 
-	"github.com/arham09/conn-db/supplier/models"
+	"github.com/arham09/conn-db/models"
 )
 
 type Repository interface {

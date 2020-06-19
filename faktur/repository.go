@@ -3,7 +3,7 @@ package faktur
 import (
 	"context"
 
-	"github.com/arham09/conn-db/faktur/models"
+	"github.com/arham09/conn-db/models"
 )
 
 type Repository interface {

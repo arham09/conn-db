@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/arham09/conn-db/models"
 	"github.com/arham09/conn-db/supplier"
-	"github.com/arham09/conn-db/supplier/models"
 	"github.com/sirupsen/logrus"
 )
 

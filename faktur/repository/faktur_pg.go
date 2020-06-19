@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/arham09/conn-db/faktur"
-	"github.com/arham09/conn-db/faktur/models"
+	"github.com/arham09/conn-db/models"
 	"github.com/sirupsen/logrus"
 )
 
