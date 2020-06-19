@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/arham09/conn-db/config"
+	"github.com/arham09/conn-db/config/database"
 	fr "github.com/arham09/conn-db/faktur/repository"
 	mid "github.com/arham09/conn-db/middleware"
 	sh "github.com/arham09/conn-db/supplier/delivery/http"
@@ -37,7 +37,7 @@ func main() {
 
 	dsn := fmt.Sprintf(`postgres://%s:%s@%s/%s?sslmode=disable`, dbUser, dbPassword, dbHost, dbName)
 
-	db, err := config.NewDB(dsn)
+	db, err := database.NewDB(dsn)
 
 	if err != nil {
 		log.Fatal(err)
