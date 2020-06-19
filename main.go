@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -12,7 +13,20 @@ import (
 	sr "github.com/arham09/conn-db/supplier/repository"
 	su "github.com/arham09/conn-db/supplier/usecase"
 	"github.com/labstack/echo"
+	"github.com/spf13/viper"
 )
+
+func init() {
+	viper.SetConfigFile(`.env`)
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	if viper.GetBool(`DEBUG`) {
+		fmt.Println("Service RUN on DEBUG mode")
+	}
+}
 
 func main() {
 	db, err := config.NewDB("postgres://medea:developer@127.0.0.1/battlefield?sslmode=disable")
@@ -44,5 +58,5 @@ func main() {
 	// Handler
 	sh.NewSupplierHandler(e, supplierUsecase)
 
-	log.Fatal(e.Start(":2002"))
+	log.Fatal(e.Start(viper.GetString(`PORT`)))
 }
