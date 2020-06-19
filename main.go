@@ -54,7 +54,7 @@ func main() {
 	e := echo.New()
 
 	middl := mid.InitMiddleware()
-	e.Use(middl.CORS)
+	// e.Use(middl.CORS)
 	e.Use(middleware.Gzip())
 	e.Use(middleware.Logger())
 
@@ -66,7 +66,7 @@ func main() {
 	supplierUsecase := su.NewSupplierUsecase(supplierRepo, fakturRepo, timeoutContext)
 
 	// Handler
-	sh.NewSupplierHandler(e, supplierUsecase)
+	sh.NewSupplierHandler(e, supplierUsecase, middl)
 
 	log.Fatal(e.Start(viper.GetString(`PORT`)))
 }
