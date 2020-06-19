@@ -12,28 +12,25 @@ import (
 	sh "github.com/arham09/conn-db/supplier/delivery/http"
 	sr "github.com/arham09/conn-db/supplier/repository"
 	su "github.com/arham09/conn-db/supplier/usecase"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/spf13/viper"
 )
 
 func init() {
-	viper.SetConfigFile(`.env`)
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(err)
+	godotenv.Load()
+
+	if os.Getenv(`ENV`) == `development` {
+		fmt.Println("Running in development mode")
 	}
 
-	if viper.GetBool(`DEBUG`) {
-		fmt.Println("Service RUN on DEBUG mode")
-	}
 }
 
 func main() {
-	dbHost := viper.GetString(`DB_HOST`)
-	dbUser := viper.GetString(`DB_USER`)
-	dbPassword := viper.GetString(`DB_PASSWORD`)
-	dbName := viper.GetString(`DB_NAME`)
+	dbHost := os.Getenv(`DB_HOST`)
+	dbUser := os.Getenv(`DB_USER`)
+	dbPassword := os.Getenv(`DB_PASSWORD`)
+	dbName := os.Getenv(`DB_NAME`)
 
 	dsn := fmt.Sprintf(`postgres://%s:%s@%s/%s?sslmode=disable`, dbUser, dbPassword, dbHost, dbName)
 
@@ -68,5 +65,5 @@ func main() {
 	// Handler
 	sh.NewSupplierHandler(e, supplierUsecase, middl)
 
-	log.Fatal(e.Start(viper.GetString(`PORT`)))
+	log.Fatal(e.Start(os.Getenv(`PORT`)))
 }
