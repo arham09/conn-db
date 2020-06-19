@@ -8,11 +8,12 @@ import (
 
 	"github.com/arham09/conn-db/config"
 	fr "github.com/arham09/conn-db/faktur/repository"
-	"github.com/arham09/conn-db/middleware"
+	mid "github.com/arham09/conn-db/middleware"
 	sh "github.com/arham09/conn-db/supplier/delivery/http"
 	sr "github.com/arham09/conn-db/supplier/repository"
 	su "github.com/arham09/conn-db/supplier/usecase"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"github.com/spf13/viper"
 )
 
@@ -52,8 +53,9 @@ func main() {
 
 	e := echo.New()
 
-	middl := middleware.InitMiddleware()
+	middl := mid.InitMiddleware()
 	e.Use(middl.CORS)
+	e.Use(middleware.Gzip())
 
 	// Module wiring db for repository and usecase to be used in handler
 	supplierRepo := sr.NewPgSupplierRepository(db)
