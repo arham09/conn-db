@@ -29,7 +29,14 @@ func init() {
 }
 
 func main() {
-	db, err := config.NewDB("postgres://medea:developer@127.0.0.1/battlefield?sslmode=disable")
+	dbHost := viper.GetString(`DB_HOST`)
+	dbUser := viper.GetString(`DB_USER`)
+	dbPassword := viper.GetString(`DB_PASSWORD`)
+	dbName := viper.GetString(`DB_NAME`)
+
+	dsn := fmt.Sprintf(`postgres://%s:%s@%s/%s?sslmode=disable`, dbUser, dbPassword, dbHost, dbName)
+
+	db, err := config.NewDB(dsn)
 
 	if err != nil {
 		log.Fatal(err)
