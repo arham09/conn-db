@@ -5,8 +5,11 @@ import (
 	"time"
 
 	"github.com/arham09/conn-db/faktur"
+	fm "github.com/arham09/conn-db/faktur/models"
 	"github.com/arham09/conn-db/supplier"
 	"github.com/arham09/conn-db/supplier/models"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/sync/errgroup"
 )
 
 type supplierUsecase struct {
@@ -25,14 +28,72 @@ func NewSupplierUsecase(s supplier.Repository, f faktur.Repository, timeout time
 }
 
 func (s *supplierUsecase) fillFakturDetails(c context.Context, data []*models.Supplier) ([]*models.Supplier, error) {
-	for _, item := range data {
-		res, err := s.fakturRepo.FetchAllFaktur(c, item.ID)
+	// mapFaktur := make(map[int64]*models.Supplier)
+
+	// for _, sup := range data {
+	// 	mapFaktur[sup.ID]
+	// }
+	// for _, item := range data {
+	// 	res, err := s.fakturRepo.FetchAllFaktur(c, item.ID)
+
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+
+	// 	item.Faktur = res
+	// }
+
+	// return data, nil
+	g, ctx := errgroup.WithContext(c)
+
+	mapFaktur := map[int64][]*fm.Faktur{}
+
+	for _, supplier := range data {
+		mapFaktur[supplier.ID] = []*fm.Faktur{}
+	}
+
+	fakturChan := make(chan []*fm.Faktur)
+
+	for supplierID := range mapFaktur {
+		supplierID := supplierID
+
+		g.Go(func() error {
+			res, err := s.fakturRepo.FetchAllFaktur(ctx, supplierID)
+
+			if err != nil {
+				return err
+			}
+
+			fakturChan <- res
+			return nil
+		})
+	}
+
+	go func() {
+		err := g.Wait()
 
 		if err != nil {
-			return nil, err
+			logrus.Error(err)
+			return
 		}
 
-		item.Faktur = res
+		close(fakturChan)
+	}()
+
+	for faktur := range fakturChan {
+		if faktur != nil && len(faktur) != 0 {
+			mapFaktur[faktur[0].SupplierID] = faktur
+		}
+	}
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	for index, item := range data {
+		if f, ok := mapFaktur[item.ID]; ok {
+			data[index].Faktur = f
+		}
 	}
 
 	return data, nil

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/arham09/conn-db/faktur"
 	"github.com/arham09/conn-db/faktur/models"
@@ -54,8 +53,6 @@ func (p *pgFakturRepository) FetchAllFaktur(ctx context.Context, supplierID int6
 	query := `SELECT id, supplier_id, COALESCE(code, ''), COALESCE(external_id, ''), name, status FROM invoice_groups where supplier_id=$1`
 
 	res, err = p.fetch(ctx, query, supplierID)
-
-	fmt.Println(res)
 
 	if err != nil {
 		return nil, err
