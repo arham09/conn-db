@@ -56,6 +56,7 @@ func main() {
 	middl := mid.InitMiddleware()
 	e.Use(middl.CORS)
 	e.Use(middleware.Gzip())
+	e.Use(middleware.Logger())
 
 	// Module wiring db for repository and usecase to be used in handler
 	supplierRepo := sr.NewPgSupplierRepository(db)
