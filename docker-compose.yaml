@@ -1,5 +1,17 @@
 version: "3.3"
-services: 
+services:
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: supplier_management_api
+    ports: 
+      - 2020:2020
+    depends_on: 
+      - database
+    volumes: 
+      - ./.env:/dist/.env
+
   database:
     image: postgres:latest # use latest official postgres version
     container_name: supplier_management_pg
