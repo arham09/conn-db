@@ -27,22 +27,6 @@ func NewSupplierUsecase(s supplier.Repository, f faktur.Repository, timeout time
 }
 
 func (s *supplierUsecase) fillFakturDetails(c context.Context, data []*models.Supplier) ([]*models.Supplier, error) {
-	// mapFaktur := make(map[int64]*models.Supplier)
-
-	// for _, sup := range data {
-	// 	mapFaktur[sup.ID]
-	// }
-	// for _, item := range data {
-	// 	res, err := s.fakturRepo.FetchAllFaktur(c, item.ID)
-
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	item.Faktur = res
-	// }
-
-	// return data, nil
 	g, ctx := errgroup.WithContext(c)
 
 	mapFaktur := map[int64][]*models.Faktur{}
