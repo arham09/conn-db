@@ -50,16 +50,19 @@ func main() {
 
 	e := echo.New()
 
+	// Init middleware for handler
 	middl := mid.InitMiddleware()
-	// e.Use(middl.CORS)
+
+	// GlobalMiddleware
 	e.Use(middleware.Gzip())
 	e.Use(middleware.Logger())
 
-	// Module wiring db for repository and usecase to be used in handler
+	// Repository
 	supplierRepo := sr.NewPgSupplierRepository(db)
 	fakturRepo := fr.NewPgFakturRepository(db)
 
 	timeoutContext := time.Duration(2) * time.Second
+	// Usecase
 	supplierUsecase := su.NewSupplierUsecase(supplierRepo, fakturRepo, timeoutContext)
 
 	// Handler

@@ -27,7 +27,7 @@ WORKDIR /dist
 RUN cp /build/main .
 
 # Export necessary port
-EXPOSE 2002
+EXPOSE 2020
 
 # Command to run when starting the container
 CMD ["/dist/main"]
