@@ -7,5 +7,5 @@ import (
 )
 
 type Repository interface {
-	FetchAllFaktur(ctx context.Context, supplierID int64) ([]*models.Faktur, error)
+	FetchAllFaktur(ctx context.Context, supplierID int64) ([]models.Faktur, error)
 }

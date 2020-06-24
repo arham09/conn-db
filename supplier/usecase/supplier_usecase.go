@@ -29,13 +29,13 @@ func NewSupplierUsecase(s supplier.Repository, f faktur.Repository, timeout time
 func (s *supplierUsecase) fillFakturDetails(c context.Context, data []*models.Supplier) ([]*models.Supplier, error) {
 	g, ctx := errgroup.WithContext(c)
 
-	mapFaktur := map[int64][]*models.Faktur{}
+	mapFaktur := map[int64][]models.Faktur{}
 
 	for _, supplier := range data {
-		mapFaktur[supplier.ID] = []*models.Faktur{}
+		mapFaktur[supplier.ID] = []models.Faktur{}
 	}
 
-	fakturChan := make(chan []*models.Faktur)
+	fakturChan := make(chan []models.Faktur)
 
 	for supplierID := range mapFaktur {
 		supplierID := supplierID

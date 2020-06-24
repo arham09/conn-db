@@ -17,7 +17,7 @@ func NewPgFakturRepository(Conn *sql.DB) faktur.Repository {
 	return &pgFakturRepository{Conn}
 }
 
-func (p *pgFakturRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Faktur, error) {
+func (p *pgFakturRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]models.Faktur, error) {
 	rows, err := p.Conn.QueryContext(ctx, query, args...)
 
 	if err != nil {
@@ -32,7 +32,7 @@ func (p *pgFakturRepository) fetch(ctx context.Context, query string, args ...in
 		}
 	}()
 
-	result := make([]*models.Faktur, 0)
+	result := make([]models.Faktur, 0)
 
 	for rows.Next() {
 		t := new(models.Faktur)
@@ -43,13 +43,13 @@ func (p *pgFakturRepository) fetch(ctx context.Context, query string, args ...in
 			return nil, err
 		}
 
-		result = append(result, t)
+		result = append(result, *t)
 	}
 
 	return result, nil
 }
 
-func (p *pgFakturRepository) FetchAllFaktur(ctx context.Context, supplierID int64) (res []*models.Faktur, err error) {
+func (p *pgFakturRepository) FetchAllFaktur(ctx context.Context, supplierID int64) (res []models.Faktur, err error) {
 	query := `SELECT id, supplier_id, COALESCE(code, ''), COALESCE(external_id, ''), name, status FROM invoice_groups where supplier_id=$1`
 
 	res, err = p.fetch(ctx, query, supplierID)
