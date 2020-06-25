@@ -50,7 +50,16 @@ func main() {
 		}
 	}()
 
-	redis, err := redis.Connect("localhost:6379", "")
+	redis := redis.Connect("localhost:6379", "")
+
+	func() {
+		_, err := redis.Ping(redis.Context()).Result()
+
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+	}()
 
 	if err != nil {
 		log.Fatal(err)
