@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/arham09/conn-db/faktur"
@@ -89,6 +90,20 @@ func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 
 	defer cancel()
+
+	value, ok := s.redis.GetItem(c, "get:supplier")
+
+	if ok {
+		res := make([]*models.Supplier, 0)
+
+		err := json.Unmarshal([]byte(value), &res)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return res, nil
+	}
 
 	res, err := s.supplierRepo.FetchAll(ctx)
 

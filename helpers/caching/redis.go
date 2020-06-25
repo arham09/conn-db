@@ -10,6 +10,7 @@ import (
 
 type Caching interface {
 	SetItem(ctx context.Context, key string, item interface{}, duration time.Duration) error
+	GetItem(ctx context.Context, key string) (string, bool)
 }
 
 type redisCaching struct {
