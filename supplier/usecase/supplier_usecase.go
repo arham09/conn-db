@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/arham09/conn-db/faktur"
@@ -94,6 +95,7 @@ func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error
 	value, ok := s.redis.GetItem(c, "get:supplier")
 
 	if ok {
+		fmt.Println("from redis")
 		res := make([]*models.Supplier, 0)
 
 		err := json.Unmarshal([]byte(value), &res)
@@ -122,6 +124,8 @@ func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("from pg")
 
 	return res, nil
 }

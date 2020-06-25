@@ -1,17 +1,5 @@
 version: "3.3"
 services:
-  api:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    container_name: supplier_management_api
-    ports: 
-      - 2020:2020
-    depends_on: 
-      - database
-    volumes: 
-      - ./.env:/dist/.env
-
   database:
     image: postgres:latest # use latest official postgres version
     container_name: supplier_management_pg
@@ -28,3 +16,22 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+
+  redis:
+    image: redis:latest
+    container_name: supplier_management_redis
+    ports:
+      - 6379:6379
+
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: supplier_management_api
+    ports: 
+      - 2020:2020
+    depends_on: 
+      - database
+      - redis
+    volumes: 
+      - ./.env:/dist/.env
