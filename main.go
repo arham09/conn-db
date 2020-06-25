@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/arham09/conn-db/config/database"
+	"github.com/arham09/conn-db/config/redis"
 	fr "github.com/arham09/conn-db/faktur/repository"
+	"github.com/arham09/conn-db/helpers/caching"
 	mid "github.com/arham09/conn-db/middleware"
 	sh "github.com/arham09/conn-db/supplier/delivery/http"
 	sr "github.com/arham09/conn-db/supplier/repository"
@@ -48,6 +50,13 @@ func main() {
 		}
 	}()
 
+	redis, err := redis.Connect("localhost:6379", "")
+
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
 	e := echo.New()
 
 	// Init middleware for handler
@@ -57,13 +66,16 @@ func main() {
 	e.Use(middleware.Gzip())
 	e.Use(middleware.Logger())
 
+	//GlobalInterface
+	cache := caching.NewRedisCaching(redis)
+
 	// Repository
 	supplierRepo := sr.NewPgSupplierRepository(db)
 	fakturRepo := fr.NewPgFakturRepository(db)
 
 	timeoutContext := time.Duration(2) * time.Second
 	// Usecase
-	supplierUsecase := su.NewSupplierUsecase(supplierRepo, fakturRepo, timeoutContext)
+	supplierUsecase := su.NewSupplierUsecase(supplierRepo, fakturRepo, cache, timeoutContext)
 
 	// Handler
 	sh.NewSupplierHandler(e, supplierUsecase, middl)

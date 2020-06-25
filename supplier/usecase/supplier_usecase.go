@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/arham09/conn-db/faktur"
+	"github.com/arham09/conn-db/helpers/caching"
 	"github.com/arham09/conn-db/models"
 	"github.com/arham09/conn-db/supplier"
 	"github.com/sirupsen/logrus"
@@ -14,14 +15,16 @@ import (
 type supplierUsecase struct {
 	supplierRepo   supplier.Repository
 	fakturRepo     faktur.Repository
+	redis          caching.Caching
 	contextTimeout time.Duration
 }
 
 // NewSupplierUsecase will create new an supplierUsecase object representation of supplier.Usecase interface
-func NewSupplierUsecase(s supplier.Repository, f faktur.Repository, timeout time.Duration) supplier.Usecase {
+func NewSupplierUsecase(s supplier.Repository, f faktur.Repository, r caching.Caching, timeout time.Duration) supplier.Usecase {
 	return &supplierUsecase{
 		supplierRepo:   s,
 		fakturRepo:     f,
+		redis:          r,
 		contextTimeout: timeout,
 	}
 }
@@ -94,6 +97,12 @@ func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error
 	}
 
 	res, err = s.fillFakturDetails(c, res)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.redis.SetItem(c, "get:supplier", res, 1*time.Hour)
 
 	if err != nil {
 		return nil, err
