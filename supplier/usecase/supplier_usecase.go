@@ -92,7 +92,7 @@ func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error
 
 	defer cancel()
 
-	value, ok := s.redis.GetItem(c, "get:supplier")
+	value, ok := s.redis.GetItem(c, "get:supplier:all")
 
 	if ok {
 		fmt.Println("from redis")
@@ -119,13 +119,35 @@ func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error
 		return nil, err
 	}
 
-	err = s.redis.SetItem(c, "get:supplier", res, 1*time.Hour)
+	err = s.redis.SetItem(c, "get:supplier:all", res, 1*time.Hour)
 
 	if err != nil {
 		return nil, err
 	}
 
 	fmt.Println("from pg")
+
+	return res, nil
+}
+
+func (s *supplierUsecase) FetchById(c context.Context, id int64) (*models.Supplier, error) {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+
+	defer cancel()
+
+	res, err := s.supplierRepo.FetchById(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	faktur, err := s.fakturRepo.FetchAllFaktur(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	res.Faktur = faktur
 
 	return res, nil
 }
