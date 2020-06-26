@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/arham09/conn-db/helpers"
 	"github.com/arham09/conn-db/models"
 	"github.com/arham09/conn-db/supplier"
 	"github.com/sirupsen/logrus"
@@ -57,6 +58,24 @@ func (p *pgSupplierRepository) FetchAll(ctx context.Context) (res []*models.Supp
 
 	if err != nil {
 		return nil, err
+	}
+
+	return res, nil
+}
+
+func (p *pgSupplierRepository) FetchById(ctx context.Context, id int64) (res *models.Supplier, err error) {
+	query := `SELECT id, code, name, address, status FROM suppliers WHERE id = $1`
+
+	list, err := p.fetch(ctx, query, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(list) > 0 {
+		res = list[0]
+	} else {
+		return nil, helpers.ErrNotFound
 	}
 
 	return res, nil
