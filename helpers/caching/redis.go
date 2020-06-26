@@ -46,3 +46,31 @@ func (r *redisCaching) GetItem(ctx context.Context, key string) (string, bool) {
 
 	return value, true
 }
+
+func (r *redisCaching) DelItem(ctx context.Context, key string) error {
+	err := r.Conn.Del(ctx, key).Err()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *redisCaching) DelWildItem(ctx context.Context, prefix string) error {
+	iter := r.Conn.Scan(ctx, 0, prefix, 0).Iterator()
+
+	for iter.Next(ctx) {
+		err := r.Conn.Del(ctx, iter.Val()).Err()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := iter.Err(); err != nil {
+		panic(err)
+	}
+
+	return nil
+}
