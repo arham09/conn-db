@@ -131,9 +131,27 @@ func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error
 }
 
 func (s *supplierUsecase) FetchById(c context.Context, id int64) (*models.Supplier, error) {
+	key := fmt.Sprintf("get:supplier:%d", id)
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 
 	defer cancel()
+
+	fmt.Println(key)
+
+	value, ok := s.redis.GetItem(c, key)
+
+	if ok {
+		fmt.Println("from redis")
+		var res *models.Supplier
+
+		err := json.Unmarshal([]byte(value), &res)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return res, nil
+	}
 
 	res, err := s.supplierRepo.FetchById(ctx, id)
 
@@ -148,6 +166,12 @@ func (s *supplierUsecase) FetchById(c context.Context, id int64) (*models.Suppli
 	}
 
 	res.Faktur = faktur
+
+	err = s.redis.SetItem(c, key, res, 1*time.Hour)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return res, nil
 }
