@@ -50,7 +50,7 @@ func main() {
 		}
 	}()
 
-	redis := redis.Connect("redis:6379", "")
+	redis := redis.Connect("localhost:6379", "")
 
 	func() {
 		_, err := redis.Ping(redis.Context()).Result()

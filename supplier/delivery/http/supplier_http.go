@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/arham09/conn-db/helpers"
 	"github.com/arham09/conn-db/middleware"
@@ -23,6 +24,7 @@ func NewSupplierHandler(e *echo.Echo, us supplier.Usecase, middleware *middlewar
 		SUsecase: us,
 	}
 	e.GET("/supplier", handler.FetchAll, middleware.CORS)
+	e.GET("/supplier/:id", handler.FetchById, middleware.CORS)
 }
 
 func (s *SupplierHandler) FetchAll(c echo.Context) error {
@@ -39,4 +41,27 @@ func (s *SupplierHandler) FetchAll(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, listSup)
+}
+
+func (s *SupplierHandler) FetchById(c echo.Context) error {
+	idSup, err := strconv.Atoi(c.Param("id"))
+	ctx := c.Request().Context()
+
+	if err != nil {
+		return c.JSON(http.StatusNotFound, helpers.ErrNotFound.Error())
+	}
+
+	id := int64(idSup)
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	supp, err := s.SUsecase.FetchById(ctx, id)
+
+	if err != nil {
+		return c.JSON(helpers.GetStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, supp)
 }
