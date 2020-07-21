@@ -1,7 +1,15 @@
 package middleware
 
 import (
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/labstack/echo"
+
+	"github.com/ulule/limiter/v3"
+	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
 // GoMiddleware represent the data-struct for middleware
@@ -17,42 +25,49 @@ func (m *GoMiddleware) CORS(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// // LOG for logger
-// func (m *GoMiddleware) LOG(next echo.HandlerFunc) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		makeLogEntry(c).Info("Request")
-// 		return next(c)
-// 	}
-// }
+func (m *GoMiddleware) IPRateLimiter() echo.MiddlewareFunc {
+	rate := limiter.Rate{
+		Period: 2 * time.Second,
+		Limit:  1,
+	}
 
-// func (m *GoMiddleware) ErrorHandler(err error, c echo.Context) {
-// 	report, ok := err.(*echo.HTTPError)
-// 	if ok {
-// 		report.Message = fmt.Sprintf("http error %d - %v", report.Code, report.Message)
-// 	} else {
-// 		report = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-// 	}
+	store := memory.NewStore()
+	ipRateLimiter := limiter.New(store, rate)
 
-// 	makeLogEntry(c).Error(report.Message)
-// 	c.HTML(report.Code, report.Message.(string))
-// }
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) (err error) {
+			ip := c.RealIP()
+
+			limiterCtx, err := ipRateLimiter.Get(c.Request().Context(), ip)
+
+			if err != nil {
+				log.Printf("IPRateLimit - ipRateLimiter.Get - err: %v, %s on %s", err, ip, c.Request().URL)
+				return c.JSON(http.StatusInternalServerError, echo.Map{
+					"success": false,
+					"message": err,
+				})
+			}
+
+			h := c.Response().Header()
+			h.Set("X-RateLimit-Limit", strconv.FormatInt(limiterCtx.Limit, 10))
+			h.Set("X-RateLimit-Remaining", strconv.FormatInt(limiterCtx.Remaining, 10))
+			h.Set("X-RateLimit-Reset", strconv.FormatInt(limiterCtx.Reset, 10))
+
+			if limiterCtx.Reached {
+				log.Printf("Too Many Requests from %s on %s", ip, c.Request().URL)
+				return c.JSON(http.StatusTooManyRequests, echo.Map{
+					"success": false,
+					"message": "Too Many Requests on " + c.Request().URL.String(),
+				})
+			}
+
+			// log.Printf("%s request continue", c.RealIP())
+			return next(c)
+		}
+	}
+}
 
 // InitMiddleware intialize the middleware
 func InitMiddleware() *GoMiddleware {
 	return &GoMiddleware{}
 }
-
-// func makeLogEntry(c echo.Context) *logrus.Entry {
-// 	if c == nil {
-// 		return logrus.WithFields(logrus.Fields{
-// 			"at": time.Now().Format("2006-01-02 15:04:05"),
-// 		})
-// 	}
-
-// 	return logrus.WithFields(logrus.Fields{
-// 		"at":     time.Now().Format("2006-01-02 15:04:05"),
-// 		"method": c.Request().Method,
-// 		"uri":    c.Request().URL.String(),
-// 		"ip":     c.Request().RemoteAddr,
-// 	})
-// }

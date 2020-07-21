@@ -14,6 +14,7 @@ require (
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
+	github.com/ulule/limiter/v3 v3.5.0
 	github.com/valyala/fasttemplate v1.1.1 // indirect
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 // indirect
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect

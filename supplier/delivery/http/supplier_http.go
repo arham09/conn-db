@@ -23,8 +23,8 @@ func NewSupplierHandler(e *echo.Echo, us supplier.Usecase, middleware *middlewar
 	handler := &SupplierHandler{
 		SUsecase: us,
 	}
-	e.GET("/supplier", handler.FetchAll, middleware.CORS)
-	e.GET("/supplier/:id", handler.FetchById, middleware.CORS)
+	e.GET("/v1/supplier", handler.FetchAll, middleware.CORS, middleware.IPRateLimiter())
+	e.GET("/v1/supplier/:id", handler.FetchById, middleware.CORS)
 }
 
 func (s *SupplierHandler) FetchAll(c echo.Context) error {
