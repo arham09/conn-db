@@ -25,9 +25,9 @@ func (m *GoMiddleware) CORS(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (m *GoMiddleware) IPRateLimiter() echo.MiddlewareFunc {
+func (m *GoMiddleware) IPRateLimiter(timeCount time.Duration) echo.MiddlewareFunc {
 	rate := limiter.Rate{
-		Period: 2 * time.Second,
+		Period: timeCount * time.Second,
 		Limit:  1,
 	}
 
@@ -61,7 +61,6 @@ func (m *GoMiddleware) IPRateLimiter() echo.MiddlewareFunc {
 				})
 			}
 
-			// log.Printf("%s request continue", c.RealIP())
 			return next(c)
 		}
 	}
