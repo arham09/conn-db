@@ -68,15 +68,15 @@ func main() {
 
 	e := echo.New()
 
+	//GlobalInterface
+	cache := caching.NewRedisCaching(redis)
+
 	// Init middleware for handler
-	middl := mid.InitMiddleware()
+	middl := mid.InitMiddleware(cache)
 
 	// GlobalMiddleware
 	e.Use(middleware.Gzip())
 	e.Use(middleware.Logger())
-
-	//GlobalInterface
-	cache := caching.NewRedisCaching(redis)
 
 	// Repository
 	supplierRepo := sr.NewPgSupplierRepository(db)

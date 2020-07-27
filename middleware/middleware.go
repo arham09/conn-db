@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/arham09/conn-db/helpers/caching"
 	"github.com/labstack/echo"
 
 	"github.com/ulule/limiter/v3"
@@ -14,6 +16,7 @@ import (
 
 // GoMiddleware represent the data-struct for middleware
 type GoMiddleware struct {
+	cache caching.Caching
 	// another stuff , may be needed by middleware
 }
 
@@ -21,6 +24,14 @@ type GoMiddleware struct {
 func (m *GoMiddleware) CORS(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+		return next(c)
+	}
+}
+
+// UserLimiter for handle request per user
+func (m *GoMiddleware) UserLimiter(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		fmt.Println(c.Request().Header.Get("x-user"))
 		return next(c)
 	}
 }
@@ -67,6 +78,8 @@ func (m *GoMiddleware) IPRateLimiter(timeCount time.Duration) echo.MiddlewareFun
 }
 
 // InitMiddleware intialize the middleware
-func InitMiddleware() *GoMiddleware {
-	return &GoMiddleware{}
+func InitMiddleware(c caching.Caching) *GoMiddleware {
+	return &GoMiddleware{
+		cache: c,
+	}
 }

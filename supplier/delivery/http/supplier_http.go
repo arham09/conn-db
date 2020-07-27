@@ -23,7 +23,7 @@ func NewSupplierHandler(e *echo.Echo, us supplier.Usecase, middleware *middlewar
 	handler := &SupplierHandler{
 		SUsecase: us,
 	}
-	e.GET("/v1/supplier", handler.FetchAll, middleware.CORS, middleware.IPRateLimiter(5))
+	e.GET("/v1/supplier", handler.FetchAll, middleware.CORS, middleware.UserLimiter)
 	e.GET("/v1/supplier/:id", handler.FetchById, middleware.CORS)
 }
 
