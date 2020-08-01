@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,6 +33,19 @@ func (m *GoMiddleware) CORS(next echo.HandlerFunc) echo.HandlerFunc {
 func (m *GoMiddleware) UserLimiter(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fmt.Println(c.Request().Header.Get("x-user"))
+
+		key := "request:user:" + c.Request().Header.Get("x-user")
+		counter := 0
+
+		err := m.cache.SetItem(context.Background(), key, counter, 2000)
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"success": false,
+				"message": err,
+			})
+		}
+
 		return next(c)
 	}
 }
