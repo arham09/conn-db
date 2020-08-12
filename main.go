@@ -76,7 +76,7 @@ func main() {
 
 	// GlobalMiddleware
 	e.Use(middleware.Gzip())
-	e.Use(middleware.Logger())
+	// e.Use(middleware.Logger())
 
 	// Repository
 	supplierRepo := sr.NewPgSupplierRepository(db)

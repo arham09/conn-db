@@ -95,7 +95,6 @@ func (s *supplierUsecase) FetchAll(c context.Context) ([]*models.Supplier, error
 	value, ok := s.redis.GetItem(c, "get:supplier:all")
 
 	if ok {
-		fmt.Println("from redis")
 		res := make([]*models.Supplier, 0)
 
 		err := json.Unmarshal([]byte(value), &res)
@@ -136,12 +135,9 @@ func (s *supplierUsecase) FetchById(c context.Context, id int64) (*models.Suppli
 
 	defer cancel()
 
-	fmt.Println(key)
-
 	value, ok := s.redis.GetItem(c, key)
 
 	if ok {
-		fmt.Println("from redis")
 		var res *models.Supplier
 
 		err := json.Unmarshal([]byte(value), &res)

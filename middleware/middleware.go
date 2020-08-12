@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -32,12 +31,32 @@ func (m *GoMiddleware) CORS(next echo.HandlerFunc) echo.HandlerFunc {
 // UserLimiter for handle request per user
 func (m *GoMiddleware) UserLimiter(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		fmt.Println(c.Request().Header.Get("x-user"))
+		var counter int
+		userID := c.Request().Header.Get("x-user-id")
+		key := "request:user:" + userID
+		count, ok := m.cache.GetItem(context.Background(), key)
 
-		key := "request:user:" + c.Request().Header.Get("x-user")
-		counter := 0
+		if ok {
+			i, err := strconv.Atoi(count)
 
-		err := m.cache.SetItem(context.Background(), key, counter, 2000)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, echo.Map{
+					"success": false,
+					"message": err,
+				})
+			}
+
+			counter = i
+
+			if counter == 5 {
+				return c.JSON(http.StatusTooManyRequests, echo.Map{
+					"success": false,
+					"message": "Too Many Requests on " + c.Request().URL.String() + " you can try again in a minute",
+				})
+			}
+		}
+
+		err := m.cache.SetItem(context.Background(), key, counter+1, 1*time.Minute)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, echo.Map{
