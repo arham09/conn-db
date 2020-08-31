@@ -34,9 +34,9 @@ func main() {
 	dbPassword := os.Getenv(`DB_PASSWORD`)
 	dbName := os.Getenv(`DB_NAME`)
 
-	dsn := fmt.Sprintf(`postgres://%s:%s@%s/%s?sslmode=disable`, dbUser, dbPassword, dbHost, dbName)
+	dbDsn := fmt.Sprintf(`postgres://%s:%s@%s/%s?sslmode=disable`, dbUser, dbPassword, dbHost, dbName)
 
-	db, err := database.NewDB(dsn)
+	db, err := database.NewDB(dbDsn)
 
 	if err != nil {
 		log.Fatal(err)
@@ -50,7 +50,12 @@ func main() {
 		}
 	}()
 
-	redis, err := redis.Connect("localhost:6379", "")
+	rdHost := os.Getenv(`RD_HOST`)
+	rdPort := os.Getenv(`RD_PORT`)
+
+	rdDsn := fmt.Sprintf(`%s:%s`, rdHost, rdPort)
+
+	redis, err := redis.Connect(rdDsn, os.Getenv(`RD_PASSWORD`))
 
 	if err != nil {
 		log.Fatal(err)
