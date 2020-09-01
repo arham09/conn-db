@@ -11,6 +11,8 @@ import (
 type Caching interface {
 	SetItem(ctx context.Context, key string, item interface{}, duration time.Duration) error
 	GetItem(ctx context.Context, key string) (string, bool)
+	DelItem(ctx context.Context, key string) error
+	DelWildItem(ctx context.Context, prefix string) error
 }
 
 type redisCaching struct {
